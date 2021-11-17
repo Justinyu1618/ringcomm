@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"/>
+    <link rel="stylesheet" href="test.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="constants.js"></script>
+    
+    <title>Document</title>
+  </head>
+  <body>
+  </body>
+    <div class="v-layout">
+      <div class="h-layout">
+        <button onclick="onPairDeviceClicked()">Pair Device</button>
+        <button onclick="onClearDataClicked()">Clear Data</button>
+        <input id="enable-text" value="" type="checkbox" onclick="onEnableTextClicked()">Enable Text</input>
+      </div>
+      <div id="device-info">
+        <div class="h-layout">
+          <h3>Device Info:</h3>
+          <div><div><b>Name:</b> <span id="name"></span></div>
+        <div><b>ID:</b> <span id="id"></span></div>
+        <div><b>Connected:</b> <span id="connected"></span></div></div>
+        </div>
+      </div>
+      <h3 id="no-device-info">No Device Paired</h3>
+      <textarea placeholder="Preset text message..." id="text-preset-input"></textarea>
+
+      <button id="take-picture">TAKE PICTURE</button>
+    <canvas id="user-picture" width=320 height=240></canvas>
+    <video id="user-video" autoplay></video>
+    <script src="bluetooth.js"></script>
+      <div id="data-container"></div>
+    </div>
+    
+  </body>
+</html>

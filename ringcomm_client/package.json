@@ -1,0 +1,25 @@
+{
+  "name": "ringcomm_client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Justinyu1618/ringcomm_client.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Justinyu1618/ringcomm_client/issues"
+  },
+  "homepage": "https://github.com/Justinyu1618/ringcomm_client#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "gulp": "^4.0.2",
+    "twilio": "^3.71.1"
+  }
+}
