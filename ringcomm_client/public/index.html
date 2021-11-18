@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html style="width: 100%" lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"/>
-    <link rel="stylesheet" href="test.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"></script>
+    <link rel="stylesheet" href="/semantic/semantic.min.css"/>
+    <link rel="stylesheet" href="index.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/semantic/semantic.min.js"></script>
+    
     <script src="constants.js"></script>
     
     <title>Document</title>
@@ -15,28 +16,58 @@
   <body>
   </body>
     <div class="v-layout">
-      <div class="h-layout">
-        <button onclick="onPairDeviceClicked()">Pair Device</button>
-        <button onclick="onClearDataClicked()">Clear Data</button>
-        <input id="enable-text" value="" type="checkbox" onclick="onEnableTextClicked()">Enable Text</input>
-      </div>
-      <div id="device-info">
-        <div class="h-layout">
-          <h3>Device Info:</h3>
-          <div><div><b>Name:</b> <span id="name"></span></div>
-        <div><b>ID:</b> <span id="id"></span></div>
-        <div><b>Connected:</b> <span id="connected"></span></div></div>
+      <div id="navbar" class="ui secondary pointing menu">
+        <div class="h-layout aligned">
+          <button style="margin: 10px;" class="ui button" >Pair Device</button>
+          <div id="connected-label" class="ui green">
+            <i class="check icon"></i>
+            Connected
+          </div>
+        </div>
+        <div class="right menu">
+          
+          <a class="ui item">
+            Home
+          </a>
+          <a class="ui item">
+            Send Text
+          </a>
+          <a class="ui item">
+            Camera
+          </a>
+          <a class="ui item">
+            Slides
+          </a>
         </div>
       </div>
-      <h3 id="no-device-info">No Device Paired</h3>
-      <textarea placeholder="Preset text message..." id="text-preset-input"></textarea>
-
-      <button id="take-picture">TAKE PICTURE</button>
-    <canvas id="user-picture" width=320 height=240></canvas>
-    <video id="user-video" autoplay></video>
-    <script src="bluetooth.js"></script>
-      <div id="data-container"></div>
+      <div id="Home" class="page">
+        <div class="h-layout">
+          <button onclick="onPairDeviceClicked()">Pair Device</button>
+          <button onclick="onClearDataClicked()">Clear Data</button>
+          <input id="enable-text" value="" type="checkbox" onclick="onEnableTextClicked()">Enable Text</input>
+        </div>
+        <div id="device-info">
+          <div class="h-layout">
+            <h3>Device Info:</h3>
+            <div><div><b>Name:</b> <span id="name"></span></div>
+          <div><b>ID:</b> <span id="id"></span></div>
+          <div><b>Connected:</b> <span id="connected"></span></div></div>
+          </div>
+        </div>
+        <h3 id="no-device-info">No Device Paired</h3>
+        <textarea placeholder="Preset text message..." id="text-preset-input"></textarea>
+      </div>
+      <div id="Text" class="page"></div>
+      <div id="Camera" class="page">
+        <button id="take-picture">TAKE PICTURE</button>
+        <canvas id="user-picture" width=320 height=240></canvas>
+        <video id="user-video" autoplay></video>
+      </div>
+      <div id="Slides" class="page">
+        <iframe id="slides" src="https://docs.google.com/presentation/d/e/2PACX-1vQZVdiAEErHgcn2qnHv-Dx8sK1L7O8xA4LgOu32_kZgxN4EiZfJFBq6DW8pWoxCWoRxPJcmN1mNENdw/embed?start=false&loop=false&delayms=6000000&slide=1" frameborder="0" width="960" height="569" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+      </div>
     </div>
-    
+    <div id="data-container"></div>
+    <script src="bluetooth.js"></script>
   </body>
 </html>

@@ -8,6 +8,10 @@ var charData = "";
 var currentCmd = "";
 
 var textEnabled = false;
+var slidesLoaded = true;
+var slideN = 1;
+var slideURL =
+  "https://docs.google.com/presentation/d/e/2PACX-1vQZVdiAEErHgcn2qnHv-Dx8sK1L7O8xA4LgOu32_kZgxN4EiZfJFBq6DW8pWoxCWoRxPJcmN1mNENdw/embed?start=false&loop=false&delayms=6000000&slide=";
 var cameraOn = false;
 
 const cmdToAction = {
@@ -15,16 +19,82 @@ const cmdToAction = {
   "(0,1)": takePicture,
 };
 
-function sendText() {
-  if (textEnabled) {
-    const msg = $("#text-preset-input").val();
-    // console.log("SENDING TEXT: " + msg);
-    const url = "/send-sms?msg=" + msg;
-    fetch(url);
+const INPUTS_PARAMS = [
+  {
+    uuid: MAIN_CHAR1_UUID,
+    name: "Twist Sensor",
+    onValue: onTwistSensor,
+  },
+  {
+    uuid: MAIN_CHAR2_UUID,
+    name: "Strain Sensor",
+    onValue: () => {},
+  },
+  {
+    uuid: MAIN_CHAR3_UUID,
+    name: "Touch Sensor",
+    onValue: () => {},
+  },
+];
+
+const inputs = [];
+class Characteristic {
+  constructor({ uuid, name, onValue }) {
+    this.uuid = uuid;
+    this.name = name;
+    this.handleNotification = (event) => {
+      const val = event.target.value;
+      console.log(this.name + ": " + val);
+      mainChar1Data.push(`${name}: ${val}`);
+      onValue(val);
+      render();
+    };
+  }
+
+  initialize(BLEService) {
+    if (!BLEService) {
+      window.addEventListener("keypress", (event) => {
+        console.log(event.key, this.name[2]);
+        if (event.key === this.name[2]) {
+          this.handleNotification({ target: { value: 1 } });
+        }
+      });
+      return;
+    }
+
+    BLEService.getCharacteristic(this.uuid).then((characteristic) => {
+      this.characteristic = characteristic;
+      this.characteristic.startNotifications().then((_) => {
+        console.log("> Started notifications for " + this.name);
+        this.characteristic.addEventListener(
+          "characteristicvaluechanged",
+          this.handleNotification
+        );
+      });
+    });
+  }
+}
+
+function onTwistSensor(val) {
+  if (val === 1) {
+    if (slidesLoaded) {
+      nextSlide();
+    } else if (textEnabled) {
+      sendText();
+    }
   }
 }
 
 function onPairDeviceClicked() {
+  for (const inp_param of INPUTS_PARAMS) {
+    const newInput = new Characteristic(inp_param);
+    newInput.initialize(false);
+    inputs.push(newInput);
+  }
+  render();
+
+  return;
+
   console.log("Requesting Ring Comm...");
   navigator.bluetooth
     .requestDevice({
@@ -43,22 +113,45 @@ function onPairDeviceClicked() {
     .then((service) => {
       console.log("> Found service");
       mainService = service;
-      return service.getCharacteristic(MAIN_CHAR1_UUID);
-    })
-    .then((characteristic) => {
-      mainChar1 = characteristic;
+
+      for (const inp_param of INPUTS_PARAMS) {
+        const newInput = new Characteristic(...inp_param);
+        newInput.initialize(service);
+        inputs.push(newInput);
+      }
       render();
-      return characteristic.startNotifications().then((_) => {
-        console.log("> Started notifications");
-        characteristic.addEventListener(
-          "characteristicvaluechanged",
-          handleNotification
-        );
-      });
     })
+    // .then((characteristic) => {
+    //   mainChar1 = characteristic;
+    //   render();
+    //   return characteristic.startNotifications().then((_) => {
+    //     console.log("> Started notifications");
+    //     characteristic.addEventListener(
+    //       "characteristicvaluechanged",
+    //       handleNotification
+    //     );
+    //   });
+    // })
     .catch((error) => {
       console.log("Argh! " + error);
     });
+}
+
+function sendText() {
+  if (textEnabled) {
+    const msg = $("#text-preset-input").val();
+    // console.log("SENDING TEXT: " + msg);
+    const url = "/send-sms?msg=" + msg;
+    fetch(url);
+  }
+}
+
+function nextSlide() {
+  if (slidesLoaded) {
+    slideN += 1;
+    const newUrl = slideURL + slideN;
+    $("#slides")[0].src = newUrl;
+  }
 }
 
 function onClearDataClicked() {
@@ -75,9 +168,10 @@ function onEnableTextClicked() {
 
 function handleNotification(event) {
   const value = event.target.value;
-  const char = String.fromCharCode(value.getUint8());
+  console.log(value);
+  // const char = String.fromCharCode(value.getUint8());
   // console.log(char);
-  charData += char;
+  // charData += char;
   // mainChar1Data.push(String.fromCharCode(value.getUint8()));
 
   if (char === "\n") {

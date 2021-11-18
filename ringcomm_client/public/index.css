@@ -1,8 +1,15 @@
+#navbar {
+  width: 100%;
+}
+
 #data-container {
-  margin: 10px;
-  width: 70%;
-  min-height: 100px;
+  width: 100%;
+  height: 20%;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
   background-color: beige;
+  -webkit-backface-visibility: hidden;
 }
 
 #text-preset-input {
@@ -21,6 +28,10 @@
 
 .h-layout {
   display: flex;
+}
+
+.h-layout.aligned {
+  align-items: center;
 }
 
 .v-layout {
