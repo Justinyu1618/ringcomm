@@ -4,7 +4,7 @@ const int TWIST_INP_PIN = 10;
 const int STRAIN_INP_PIN = 9;
 const int TOUCH_INP_PIN = 8;
 
-const int delayMS = 200;
+const int delayMS = 500;
 
 void setup(){
   Serial.begin(9600);
@@ -15,7 +15,7 @@ void setup(){
 
   // bluetooth setup functions
   setupBluetooth();
-  advertiseBluetooth();
+//  advertiseBluetooth();
 }
 
 // test value
@@ -37,10 +37,10 @@ void loop(){
   sendValue(STRAIN, strainVal);
   sendValue(TOUCH, touchVal);
   
-//  Serial.println(twistVal);
-//  Serial.println(strainVal);
-//  Serial.println(touchVal);
-//  Serial.println("\n\n");
+  Serial.println(twistVal);
+  Serial.println(strainVal);
+  Serial.println(touchVal);
+  Serial.println("\n\n");
 
 
   

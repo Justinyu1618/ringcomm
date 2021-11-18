@@ -104,11 +104,7 @@ template <class T>
 bool sendValue(SENSOR_INPUTS inp, T val ) {
   switch(inp){
     case TWIST:
-//      Serial.print("in Twist: " + val + " " +  lastTwistInputValue + "\n");
       if(val != lastTwistInputValue){
-        Serial.print("twist ");
-        Serial.println(val);
-        Serial.println(lastTwistInputValue);
         twistInputCharacteristic.writeValue(val);
         lastTwistInputValue = val;
         return true;
