@@ -3,21 +3,15 @@ var mainGattServer;
 var mainService;
 var mainChar1;
 
-var mainChar1Data = [];
-var charData = "";
-var currentCmd = "";
+var allData = [];
 
-var textEnabled = false;
+var heartRateNormal = true;
+
 var slidesLoaded = true;
 var slideN = 1;
 var slideURL =
   "https://docs.google.com/presentation/d/e/2PACX-1vQZVdiAEErHgcn2qnHv-Dx8sK1L7O8xA4LgOu32_kZgxN4EiZfJFBq6DW8pWoxCWoRxPJcmN1mNENdw/embed?start=false&loop=false&delayms=6000000&slide=";
 var cameraOn = false;
-
-const cmdToAction = {
-  2: sendText,
-  "(0,1)": takePicture,
-};
 
 const INPUTS_PARAMS = [
   {
@@ -28,12 +22,12 @@ const INPUTS_PARAMS = [
   {
     uuid: MAIN_CHAR2_UUID,
     name: "Strain Sensor",
-    onValue: () => {},
+    onValue: onStrainSensor,
   },
   {
     uuid: MAIN_CHAR3_UUID,
     name: "Touch Sensor",
-    onValue: () => {},
+    onValue: onTouchSensor,
   },
 ];
 
@@ -43,9 +37,9 @@ class Characteristic {
     this.uuid = uuid;
     this.name = name;
     this.handleNotification = (event) => {
-      const val = event.target.value;
+      const val = event.target.value; //.getUint8();
       console.log(this.name + ": " + val);
-      mainChar1Data.push(`${name}: ${val}`);
+      allData.unshift(`(${allData.length}) ${name}: ${val}`);
       onValue(val);
       render();
     };
@@ -76,24 +70,39 @@ class Characteristic {
 }
 
 function onTwistSensor(val) {
+  console.log("TWIST SENSOR: ", val);
   if (val === 1) {
-    if (slidesLoaded) {
+    if (slidesLoaded && currentPage === "Slides") {
       nextSlide();
-    } else if (textEnabled) {
-      sendText();
+    } else if (cameraOn && currentPage === "Camera") {
+      takePicture();
     }
   }
 }
 
-function onPairDeviceClicked() {
-  for (const inp_param of INPUTS_PARAMS) {
-    const newInput = new Characteristic(inp_param);
-    newInput.initialize(false);
-    inputs.push(newInput);
+function onStrainSensor(val) {
+  if (val === 1) {
+    heartRateNormal = false;
+  } else if (val === 0) {
+    heartRateNormal = true;
   }
-  render();
+}
 
-  return;
+function onTouchSensor(val) {
+  if (val === 1) {
+    sendText();
+  }
+}
+
+function onPairDeviceClicked() {
+  // for (const inp_param of INPUTS_PARAMS) {
+  //   const newInput = new Characteristic(inp_param);
+  //   newInput.initialize(false);
+  //   inputs.push(newInput);
+  // }
+  // render();
+
+  // return;
 
   console.log("Requesting Ring Comm...");
   navigator.bluetooth
@@ -101,6 +110,7 @@ function onPairDeviceClicked() {
       filters: [{ services: [MAIN_SERVICE_UUID] }, { name: "Ring Comm" }],
     })
     .then((device) => {
+      $("#pair-device-button").addClass("loading");
       console.log("> Requested " + device.name + " (" + device.id + ")");
       ringcommDevice = device;
       return device.gatt.connect();
@@ -115,33 +125,26 @@ function onPairDeviceClicked() {
       mainService = service;
 
       for (const inp_param of INPUTS_PARAMS) {
-        const newInput = new Characteristic(...inp_param);
+        const newInput = new Characteristic(inp_param);
         newInput.initialize(service);
         inputs.push(newInput);
       }
       render();
+      $("#pair-device-button").removeClass("loading");
+      setConnectionStatus(true);
     })
-    // .then((characteristic) => {
-    //   mainChar1 = characteristic;
-    //   render();
-    //   return characteristic.startNotifications().then((_) => {
-    //     console.log("> Started notifications");
-    //     characteristic.addEventListener(
-    //       "characteristicvaluechanged",
-    //       handleNotification
-    //     );
-    //   });
-    // })
     .catch((error) => {
       console.log("Argh! " + error);
+      $("#pair-device-button").removeClass("loading");
     });
 }
 
 function sendText() {
-  if (textEnabled) {
-    const msg = $("#text-preset-input").val();
-    // console.log("SENDING TEXT: " + msg);
-    const url = "/send-sms?msg=" + msg;
+  const msg = $("#text-preset-input").val();
+  const number = $("#text-number").val();
+  if (msg && number) {
+    console.log("SENDING TEXT: " + msg);
+    const url = "/send-sms?msg=" + msg + "&number=" + number;
     fetch(url);
   }
 }
@@ -155,43 +158,15 @@ function nextSlide() {
 }
 
 function onClearDataClicked() {
-  mainChar1Data = [];
-  charData = "";
+  allData = [];
   render();
 }
 
-function onEnableTextClicked() {
-  textEnabled = !textEnabled;
+// function onEnableTextClicked() {
+//   textEnabled = !textEnabled;
 
-  $("#text-preset-input").css("display", textEnabled ? "block" : "none");
-}
-
-function handleNotification(event) {
-  const value = event.target.value;
-  console.log(value);
-  // const char = String.fromCharCode(value.getUint8());
-  // console.log(char);
-  // charData += char;
-  // mainChar1Data.push(String.fromCharCode(value.getUint8()));
-
-  if (char === "\n") {
-    handleDataActions(currentCmd);
-    currentCmd = "";
-  } else {
-    currentCmd += char;
-  }
-
-  // handleDataActions(value);
-  render();
-}
-
-function handleDataActions(cmd) {
-  console.log("action: ", cmd);
-  // const cmd = data.getUint8(0);
-  if (cmdToAction[cmd]) {
-    cmdToAction[cmd]();
-  }
-}
+//   $("#text-preset-input").css("display", textEnabled ? "block" : "none");
+// }
 
 const dec = new TextDecoder("utf-8");
 
@@ -206,11 +181,23 @@ function render() {
     $("#device-info #connected").text(
       ringcommDevice.gatt.connected ? "true" : "false"
     );
+
+    $("#heartrate-status").css("display", "block");
   }
+
+  const hrStatus = $("#heartrate-status");
+  if (heartRateNormal) {
+    hrStatus.css("color", "green");
+    hrStatus.text("Normal");
+  } else {
+    hrStatus.css("color", "red");
+    hrStatus.text("Accelerated");
+  }
+
   // render data container
   $("#data-container").empty();
-  // console.log(String.fromCharCode(...mainChar1Data));
-  for (const strData of charData.split("\n")) {
+  // console.log(String.fromCharCode(...allData));
+  for (const data of allData) {
     // var strData = "0x";
 
     // for (let i = 0; i < d.byteLength; i++) {
@@ -218,7 +205,7 @@ function render() {
     //   console.log(d.getUint8(i));
     // }
     // console.log(d.getUint8(d.byteLength - 1));
-    $("#data-container").append(`<div>${strData}<div>`);
+    $("#data-container").append(`<div>${data}<div>`);
   }
 }
 
@@ -244,12 +231,15 @@ function setupCamera() {
 
   button.addEventListener("click", () => {
     $("#user-video").css("display", "initial");
+    $("#user-picture").css("display", "none");
+    $("#camera-container").css("background-color", "none");
     cameraOn = true;
   });
 
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
     video.srcObject = stream;
     const { height, width } = stream.getVideoTracks()[0].getSettings();
+    console.log(height, width);
     canvas.width = width;
     canvas.height = height;
   });
@@ -259,12 +249,23 @@ function takePicture() {
   if (cameraOn) {
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     $("#user-video").css("display", "none");
+    $("#user-picture").css("display", "block");
     cameraOn = false;
   }
 }
 
-console.log(navigator);
-console.log(navigator.MediaDevices);
-console.log("supported: ", "mediaDevices" in navigator);
+// console.log(navigator);
+// console.log(navigator.MediaDevices);
+// console.log("supported: ", "mediaDevices" in navigator);
 
 setupCamera();
+
+function setConnectionStatus(connected) {
+  if (connected) {
+    $("#status-connected").css("display", "block");
+    $("#status-disconnected").css("display", "none");
+  } else {
+    $("#status-connected").css("display", "none");
+    $("#status-disconnected").css("display", "block");
+  }
+}

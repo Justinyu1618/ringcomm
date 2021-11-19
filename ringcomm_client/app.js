@@ -11,12 +11,13 @@ const client = require("twilio")(accountSid, authToken);
 
 app.get("/send-sms", (req, res) => {
   const msg = req.query.msg;
+  const number = req.query.number || "+16179570655";
 
   client.messages
     .create({
       body: msg,
       from: "+16173624067",
-      to: "+16179570655",
+      to: number,
     })
     .then((message) => console.log(message.sid));
 });

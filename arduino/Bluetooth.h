@@ -105,6 +105,8 @@ bool sendValue(SENSOR_INPUTS inp, T val ) {
   switch(inp){
     case TWIST:
       if(val != lastTwistInputValue){
+        Serial.print("Twist sensor sending: ");
+        Serial.println(val);
         twistInputCharacteristic.writeValue(val);
         lastTwistInputValue = val;
         return true;

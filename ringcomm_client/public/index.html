@@ -18,56 +18,82 @@
     <div class="v-layout">
       <div id="navbar" class="ui secondary pointing menu">
         <div class="h-layout aligned">
-          <button style="margin: 10px;" class="ui button" >Pair Device</button>
-          <div id="connected-label" class="ui green">
+          <button id="pair-device-button" onclick="onPairDeviceClicked()" style="margin: 10px;" class="ui button primary" >Pair Device</button>
+          <div id="status-connected" class="ui green label">
             <i class="check icon"></i>
             Connected
+          </div>
+          <div id="status-disconnected" class="ui grey label">
+            <i class="x icon"></i>
+            Not connected
           </div>
         </div>
         <div class="right menu">
           
-          <a class="ui item">
+          <a onclick="changePage('Home')" class="ui item">
             Home
           </a>
-          <a class="ui item">
-            Send Text
+          <a onclick="changePage('Text')" class="ui item">
+            Text Settings
           </a>
-          <a class="ui item">
+          <a onclick="changePage('Camera')" class="ui item">
             Camera
           </a>
-          <a class="ui item">
+          <a onclick="changePage('Slides')" class="ui item">
             Slides
           </a>
         </div>
       </div>
       <div id="Home" class="page">
-        <div class="h-layout">
-          <button onclick="onPairDeviceClicked()">Pair Device</button>
-          <button onclick="onClearDataClicked()">Clear Data</button>
-          <input id="enable-text" value="" type="checkbox" onclick="onEnableTextClicked()">Enable Text</input>
-        </div>
         <div id="device-info">
-          <div class="h-layout">
+          <div class="h-layout aligned">
             <h3>Device Info:</h3>
             <div><div><b>Name:</b> <span id="name"></span></div>
-          <div><b>ID:</b> <span id="id"></span></div>
-          <div><b>Connected:</b> <span id="connected"></span></div></div>
+            <div><b>ID:</b> <span id="id"></span></div>
+            <div><b>Connected:</b> <span id="connected"></span></div></div>
           </div>
         </div>
         <h3 id="no-device-info">No Device Paired</h3>
-        <textarea placeholder="Preset text message..." id="text-preset-input"></textarea>
+        <h3 id="heartrate-text">
+          Heart Rate: <strong><span id="heartrate-status"></span></strong>
+        </h3>
+        <div id="data-container-wrapper">
+          <h3>Incoming Data</h3>
+          <button class="ui button" onclick="onClearDataClicked()">Clear Data</button>
+        <div id="data-container"></div>
+        
+        </div>
+        
       </div>
-      <div id="Text" class="page"></div>
+      <div id="Text" class="page">
+        <h2>Text Message Settings</h2>
+        <div class="h-layout aligned" >
+          <p style="margin-right: 15px; margin-bottom: 0px"><strong>Phone Number</strong></p>
+          <div class="ui left icon input">
+            <input id="text-number" type="text" placeholder="Phone number..." class="">
+            <i class="hashtag icon"></i>
+          </div>
+        </div>
+        
+        <div classs="ui input">
+          <textarea placeholder="Preset text message..." id="text-preset-input"></textarea>
+        </div>
+      </div>
       <div id="Camera" class="page">
-        <button id="take-picture">TAKE PICTURE</button>
-        <canvas id="user-picture" width=320 height=240></canvas>
-        <video id="user-video" autoplay></video>
+        <button class="ui button" id="take-picture" style="margin-bottom: 15px;">Start Camera</button>
+        <!-- <button class="ui button" onclick="takePicture()" style="margin-bottom: 15px;">Take Picture</button> -->
+        <div id="camera-container">
+          <canvas id="user-picture" width="100%" height="100%"></canvas>
+          <video id="user-video" autoplay></video>
+        </div>
+        
       </div>
       <div id="Slides" class="page">
         <iframe id="slides" src="https://docs.google.com/presentation/d/e/2PACX-1vQZVdiAEErHgcn2qnHv-Dx8sK1L7O8xA4LgOu32_kZgxN4EiZfJFBq6DW8pWoxCWoRxPJcmN1mNENdw/embed?start=false&loop=false&delayms=6000000&slide=1" frameborder="0" width="960" height="569" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
       </div>
     </div>
-    <div id="data-container"></div>
+    
     <script src="bluetooth.js"></script>
+    <script src="index.js"></script>
   </body>
 </html>

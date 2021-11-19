@@ -2,20 +2,37 @@
   width: 100%;
 }
 
+.page {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#status-connected {
+  display: none;
+}
+
 #data-container {
-  width: 100%;
-  height: 20%;
-  position: fixed;
-  bottom: 0px;
-  left: 0px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+
+  min-height: 50px;
+  max-height: 50vh;
+  margin-top: 20px;
   background-color: beige;
-  -webkit-backface-visibility: hidden;
+}
+
+#data-container-wrapper {
+  margin-top: 150px;
+  width: 60%;
 }
 
 #text-preset-input {
-  min-height: 50px;
+  padding: 10px;
+  min-height: 250px;
   width: 400px;
-  display: none;
 }
 
 #device-info {
@@ -44,11 +61,49 @@
   margin: 10px 0px 10px 0px;
 }
 
-#user-video {
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  position: fixed;
+#camera-container {
+  min-width: 40vw;
+  min-height: 30vh;
+  background-color: lightgrey;
+  display: flex;
+  justify-content: center;
+}
+
+#user-picture {
+  /* width: 100%;
+  height: 100%; */
   display: none;
+}
+
+#user-video {
+  /* width: 100%;
+  height: 100%; */
+  /* top: 0;
+  left: 0; */
+  /* position: fixed; */
+  display: none;
+}
+
+#Home {
+  display: flex;
+}
+
+#Text {
+  display: none;
+}
+
+#Text > * {
+  margin: 15px 0px;
+}
+
+#Camera {
+  display: none;
+}
+
+#Slides {
+  display: none;
+}
+
+#heartrate-text {
+  /* display: none; */
 }

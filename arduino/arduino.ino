@@ -8,39 +8,48 @@ const int delayMS = 500;
 
 void setup(){
   Serial.begin(9600);
-
+  while(!Serial){
+    continue;
+  }
+  Serial.print("AHHHH");
   pinMode(TWIST_INP_PIN, INPUT_PULLUP);
   pinMode(STRAIN_INP_PIN, INPUT_PULLUP);
   pinMode(TOUCH_INP_PIN, INPUT_PULLUP);
 
   // bluetooth setup functions
   setupBluetooth();
-//  advertiseBluetooth();
+  advertiseBluetooth();
 }
 
+int lastTwistSend = millis();
 // test value
 int val = 0;
 void loop(){
   unsigned long time = millis();
-//  verifyConnection();
+  verifyConnection();
 
-  int twistVal = digitalRead(TWIST_INP_PIN);
-  int strainVal = digitalRead(STRAIN_INP_PIN);
-  int touchVal = digitalRead(TOUCH_INP_PIN);
+//  int twistVal = digitalRead(TWIST_INP_PIN);
+//  int strainVal = digitalRead(STRAIN_INP_PIN);
+//  int touchVal = digitalRead(TOUCH_INP_PIN);
 
   /* send bluetooth using sendValue(inp, value)
       inp: TWIST, STRAIN, TOUCH
-      value: int, int, float 
+      value: int, int, float  
   */
+
+  if(millis() - lastTwistSend > 3000){
+    sendValue(TWIST, 1);
+    lastTwistSend = millis();
+  }
   
-  sendValue(TWIST, twistVal);
-  sendValue(STRAIN, strainVal);
-  sendValue(TOUCH, touchVal);
+  sendValue(TWIST, 0);
+//  sendValue(STRAIN, strainVal);
+//  sendValue(TOUCH, touchVal);
   
-  Serial.println(twistVal);
-  Serial.println(strainVal);
-  Serial.println(touchVal);
-  Serial.println("\n\n");
+//  Serial.println(twistVal);
+//  Serial.println(strainVal);
+//  Serial.println(touchVal);
+//  Serial.println("\n\n");
 
 
   
