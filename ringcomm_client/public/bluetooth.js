@@ -84,11 +84,7 @@ function onTwistSensor(val) {
 }
 
 function onStrainSensor(val) {
-  if (val === 1) {
-    heartRateNormal = false;
-  } else if (val === 0) {
-    heartRateNormal = true;
-  }
+  updateHeartRatePlot(val);
 }
 
 function onTouchSensor(val) {
@@ -98,15 +94,6 @@ function onTouchSensor(val) {
 }
 
 function onPairDeviceClicked() {
-  // for (const inp_param of INPUTS_PARAMS) {
-  //   const newInput = new Characteristic(inp_param);
-  //   newInput.initialize(false);
-  //   inputs.push(newInput);
-  // }
-  // render();
-
-  // return;
-
   console.log("Requesting Ring Comm...");
   navigator.bluetooth
     .requestDevice({
@@ -141,6 +128,8 @@ function onPairDeviceClicked() {
       $("#pair-device-button").removeClass("loading");
     });
 }
+
+// ***** ACTIONS *****
 
 function sendText() {
   const msg = $("#text-preset-input").val();
@@ -279,4 +268,37 @@ function setConnectionStatus(connected) {
     $("#status-connected").css("display", "none");
     $("#status-disconnected").css("display", "block");
   }
+}
+
+// const MAX_DATA_LEN = 30;
+// var heartRateData = [0];
+function setupHeartRatePlot() {
+  const time = new Date();
+  const initData = [
+    { x: [time], y: [0], mode: "lines", line: { color: "#80CAF6" } },
+  ];
+  Plotly.newPlot("graph", initData);
+}
+
+setupHeartRatePlot();
+
+function updateHeartRatePlot(val) {
+  const time = new Date();
+  const update = {
+    x: [[time]],
+    y: [[val]],
+  };
+
+  const start = time.setSeconds(time.getSeconds() - 30);
+  const end = time.setSeconds(time.getSeconds() + 30);
+
+  const minutesView = {
+    xaxis: {
+      type: "date",
+      range: [start, end],
+    },
+  };
+
+  Plotly.relayout("graph", minutesView);
+  Plotly.extendTraces("graph", update, [0]);
 }
