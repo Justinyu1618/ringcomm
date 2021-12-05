@@ -14,11 +14,11 @@ const char* touchInputUUID = "19b10003-e8f2-537e-4f6c-d104768a1214";
 BLEService ledService(serviceUUID); 
 
 BLEByteCharacteristic twistInputCharacteristic(twistInputUUID, BLERead | BLEWrite | BLENotify);
-BLEByteCharacteristic strainInputCharacteristic(strainInputUUID, BLERead | BLEWrite | BLENotify);
+BLEFloatCharacteristic strainInputCharacteristic(strainInputUUID, BLERead | BLEWrite | BLENotify);
 BLEFloatCharacteristic touchInputCharacteristic(touchInputUUID, BLERead | BLEWrite | BLENotify);
 
 int lastTwistInputValue = 0;
-int lastStrainInputValue = 0;
+float lastStrainInputValue = 0;
 float lastTouchInputValue = 0;
 
 enum SENSOR_INPUTS { TWIST, STRAIN, TOUCH };
