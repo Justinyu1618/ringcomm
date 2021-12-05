@@ -10,7 +10,8 @@ var heartRateNormal = true;
 var slidesLoaded = true;
 var slideN = 1;
 var slideURL =
-  "https://docs.google.com/presentation/d/e/2PACX-1vQZVdiAEErHgcn2qnHv-Dx8sK1L7O8xA4LgOu32_kZgxN4EiZfJFBq6DW8pWoxCWoRxPJcmN1mNENdw/embed?start=false&loop=false&delayms=6000000&slide=";
+  "https://docs.google.com/presentation/d/e/2PACX-1vTzEvwGb-7xGt08LGmmguJcHoKfGyFUmAfN388o4v67clbOU1NqCHD1nYeJzsZGZQybKmECs5a85wid/embed?start=false&loop=false&delayms=6000000&slide=";
+
 var cameraOn = false;
 
 const INPUTS_PARAMS = [
@@ -37,7 +38,7 @@ class Characteristic {
     this.uuid = uuid;
     this.name = name;
     this.handleNotification = (event) => {
-      const val = event.target.value; //.getUint8();
+      const val = event.target.value.getUint8();
       console.log(this.name + ": " + val);
       allData.unshift(`(${allData.length}) ${name}: ${val}`);
       onValue(val);
@@ -71,11 +72,13 @@ class Characteristic {
 
 function onTwistSensor(val) {
   console.log("TWIST SENSOR: ", val);
-  if (val === 1) {
+  if (val === 0) {
     if (slidesLoaded && currentPage === "Slides") {
       nextSlide();
     } else if (cameraOn && currentPage === "Camera") {
       takePicture();
+    } else if (currentPage === "Text") {
+      sendText();
     }
   }
 }
@@ -152,6 +155,14 @@ function sendText() {
 function nextSlide() {
   if (slidesLoaded) {
     slideN += 1;
+    const newUrl = slideURL + slideN;
+    $("#slides")[0].src = newUrl;
+  }
+}
+
+function previousSlide() {
+  if (slidesLoaded) {
+    slideN -= 1;
     const newUrl = slideURL + slideN;
     $("#slides")[0].src = newUrl;
   }
