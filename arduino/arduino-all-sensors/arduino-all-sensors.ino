@@ -2,7 +2,7 @@
 #define TWIST_UNTWISTED 1
 #define TWIST_TWISTED 2
 
-const int STRAIN_INP_PIN = 9;
+const int STRAIN_INP_PIN = 19; //change this
 const int TOUCH_INP_PIN = 8;
 
 const int delayMS = 10;
@@ -23,6 +23,15 @@ int twist_readIndex = 0;              // the index of the current reading
 int twist_total = 0;                  // the running total
 int twist_average = 0;                // the average
 
+
+
+int v_out; float VOut; float oldVOut; //analog read and calibration floats
+int size_arr = 40; //size of running average array
+float raw_volts [40]; //raw readings array
+int iterator; //pointer to store in array
+float sum_volts;
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -30,6 +39,7 @@ void setup() {
     continue;
   pinMode(TWIST_PWM_PIN, OUTPUT);
   pinMode(TWIST_RECEIVER_PIN, INPUT);  
+  pinMode(STRAIN_INP_PIN, OUTPUT);
 
   // bluetooth setup functions
   //setupBluetooth();
@@ -39,6 +49,12 @@ void setup() {
   for (int thisReading = 0; thisReading < twist_numReadings; thisReading++) {
     twist_readings[thisReading] = 0;
   }
+
+  //initialize all the force variables to zero
+  iterator = 0;
+  sum_volts = 0;
+  delay_iter = 0;
+  oldVOut = 0;
 }
 
 void loop() {
@@ -49,7 +65,27 @@ void loop() {
   //updateTwistFSM();
 
  
-  //int strainVal = digitalRead(STRAIN_INP_PIN);
+  //code for force sensor
+  v_out = analogRead(v_out_pin); //v_out from wheatstone_bridge circuit
+  raw_volts[iterator] = v_out;
+  for (int i = 0; i < size_arr; i++) {
+    sum_volts += raw_volts[i];
+  }
+  
+   VOut = sum_volts / size_arr -  oldVOut;
+   oldVOut = VOut;
+   sum_volts = 0;
+  iterator = iterator + 1;
+  if (iterator == size_arr) {
+    iterator = 0;
+  }
+
+
+if (delay_iter > 50) {
+  sendValue(STRAIN, VOut); //send value to Heroku app
+  delay_iter = 0;
+}
+
   //int touchVal = digitalRead(TOUCH_INP_PIN);
 
   /* send bluetooth using sendValue(inp, value)
@@ -57,7 +93,7 @@ void loop() {
       value: int, int, float  
   */
   
-  //sendValue(STRAIN, strainVal);
+
   //sendValue(TOUCH, touchVal);
   
   while(millis() - time < delayMS){
