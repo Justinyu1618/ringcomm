@@ -59,10 +59,9 @@ void loop() {
 
     if (prev_state == state_NOT_TOUCHED && state == state_TOUCHED) {
       start_index = button[0] ? 0 : (button[1] ? 1 : 2);
-      Serial.print("touched");
-      Serial.println(start_index);
+      if (debug) Serial.print("touched");
     } else if (prev_state == state_TOUCHED && state == state_NOT_TOUCHED) {
-      Serial.println("released");
+      if (debug) Serial.println("released");
       if (start_index == end_index) {
         Serial.print("tab,");
         Serial.print(start_index);
