@@ -73,57 +73,7 @@ void loop() {
         Serial.print("slide,-1;");
       }
     }
-
-    /*
-    int touched[2] = {-1, -1};
-    int touch = 0;
-    for (int i = 0; i < 2; i++) {
-      if (debug) Serial.print(button[i]);
-      if (button[i] == 1) {
-        touched[touch] = i;
-        touch++;
-      }
-    }
-    if (debug) Serial.println(button[2]);
-    // hack for button #3
-    if (touched[0] < 0 && touched[1] < 0 && button[2] == 1) touched[0] = 2;
-
-    if (touched[0] >= 0) {
-        if (touched[1] < 0) {
-          // single value pressed
-          int index1 = touched[0];
-          
-          float frac1 = index1 / (len_pins - 1.0);
-
-          if (!debug) {
-             Serial.print("tab,");
-             Serial.print(index1 + 1);
-             Serial.println(";");
-          }
-        } else {
-          int index1 = touched[0];
-          int index2 = touched[1];
-          float frac1 = (touchValues[index1] - mins[index1]) / maxes[index1];
-          float frac2 = (touchValues[index2] - mins[index2]) / maxes[index2];
-          if (frac1 < 0) frac1 = 0.0;
-          if (frac2 < 0) frac2 = 0.0;
-          if (frac1 > 1) frac1 = 1.0;
-          if (frac2 > 1) frac2 = 1.0;
-          // Serial.printf("\n%d: %f, %d: %f\n", touched[0], frac1, touched[1], frac2);
-
-          float formula = (((1-frac1)+frac2) + index1) / (len_pins - 1);
-          if (formula > 1) formula = 1.00;
-          if (!debug) {
-             Serial.print("slider,");
-             Serial.print(formula, 2);
-             Serial.println(";");
-          }
-        }        
-      }
-    */
-    for (int i = 0; i < len_pins; i++) {
-      prev_buttons[i] = button[i];
-    }
+    
     prev_state = state;
     
     timer = millis();
