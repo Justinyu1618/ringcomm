@@ -1,36 +1,42 @@
+#include "Bluetooth.h"
+
 #define TWIST_START 0
 #define TWIST_UNTWISTED 1
 #define TWIST_TWISTED 2
 
-const int STRAIN_INP_PIN = 19; //change this
+const int STRAIN_INP_PIN = 14; //change this
 const int TOUCH_INP_PIN = 8;
 
 const int delayMS = 10;
 
 // twist variables
 int TWIST_PWM_PIN = 12;
-int TWIST_RECEIVER_PIN = 17;
+int TWIST_RECEIVER_PIN = 15;
 
 // PWM
 int twist_duty_cycle = int(0.1*255);
 
-double untwisted_threshold = 700;
+double untwisted_threshold = 950;
 int twist_state = TWIST_START;
 
-const int twist_numReadings = 10;     // number of twist readings to average
+const int twist_numReadings = 75;     // number of twist readings to average
 int twist_readings[twist_numReadings];      // the readings from the analog input
 int twist_readIndex = 0;              // the index of the current reading
 int twist_total = 0;                  // the running total
 int twist_average = 0;                // the average
 
 
-
 int v_out; float VOut; float oldVOut; //analog read and calibration floats
 int size_arr = 40; //size of running average array
 float raw_volts [40]; //raw readings array
 int iterator; //pointer to store in array
+int delay_iter;
 float sum_volts;
 
+
+int twist_window_start;
+int twist_window_duration = 200;
+int twist_count_above_threshold = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -42,8 +48,8 @@ void setup() {
   pinMode(STRAIN_INP_PIN, OUTPUT);
 
   // bluetooth setup functions
-  //setupBluetooth();
-  //advertiseBluetooth();
+  setupBluetooth();
+  advertiseBluetooth();
 
   // initialize all the twist readings to 0:
   for (int thisReading = 0; thisReading < twist_numReadings; thisReading++) {
@@ -59,14 +65,14 @@ void setup() {
 
 void loop() {
   unsigned long time = millis();
-  //verifyConnection();
+  verifyConnection();
 
-  //updateTwistAverage();
-  //updateTwistFSM();
+  updateTwistAverage();
+  updateTwistFSM();
 
  
   //code for force sensor
-  v_out = analogRead(v_out_pin); //v_out from wheatstone_bridge circuit
+  v_out = analogRead(STRAIN_INP_PIN); //v_out from wheatstone_bridge circuit
   raw_volts[iterator] = v_out;
   for (int i = 0; i < size_arr; i++) {
     sum_volts += raw_volts[i];
@@ -76,6 +82,7 @@ void loop() {
    oldVOut = VOut;
    sum_volts = 0;
   iterator = iterator + 1;
+  delay_iter = delay_iter + 1;
   if (iterator == size_arr) {
     iterator = 0;
   }
@@ -83,6 +90,7 @@ void loop() {
 
 if (delay_iter > 50) {
   sendValue(STRAIN, VOut); //send value to Heroku app
+  //Serial.print("strain:"); Serial.println(VOut);
   delay_iter = 0;
 }
 
@@ -102,20 +110,34 @@ if (delay_iter > 50) {
 }
 
 void updateTwistFSM() {
+ //   Serial.println(twist_state);
    switch(twist_state) {
     case TWIST_START: 
       twist_state = TWIST_UNTWISTED;
       break;
     case TWIST_UNTWISTED:
-      if (twist_average < untwisted_threshold) {
-        //  sendValue(TWIST, 0);
+      if (twist_average > untwisted_threshold) {
+        sendValue(TWIST, 0);
         twist_state = TWIST_TWISTED;
+        //Serial.println("twisted");
+        twist_window_start = millis();
+        twist_count_above_threshold = 0; 
       }
       break;
     case TWIST_TWISTED:
-      if (twist_average > untwisted_threshold) {
-        //  sendValue(TWIST, 1);
+      if (millis() > twist_window_start + twist_window_duration) {
+        if (twist_count_above_threshold == 0) {
+           sendValue(TWIST, 1);
+        //Serial.println("untwisted");
         twist_state = TWIST_UNTWISTED;
+        } else { // new window
+           twist_window_start = millis();
+            twist_count_above_threshold = 0; 
+        }
+      } else {
+        if (twist_average > untwisted_threshold) {
+          twist_count_above_threshold ++;
+        }
       }
       break;
     default: 
@@ -147,10 +169,11 @@ void updateTwistAverage() {
 
   // calculate the average:
   twist_average = twist_total / twist_numReadings;
-
-   // keep scale constant
-    Serial.print(0);
-    Serial.print(",");
+/*
+ // keep scale constant
+  Serial.print(500);
+  Serial.print(",");
   // send it to the computer as ASCII digits
   Serial.println(twist_average);
+  */
 }
