@@ -4,11 +4,17 @@
 #define TWIST_START 0
 #define TWIST_UNTWISTED 1
 #define TWIST_TWISTED 2
+#define TWIST_BASELINE_UNTWISTED 3
+#define TWIST_BASELINE_TWISTED 4
+#define TWIST_BASELINE_SETTLE 5
 
 const int STRAIN_INP_PIN = 21; //change this
 const int TOUCH_INP_PIN = 8;
 
 const int delayMS = 10;
+
+int strain_start = 0;
+int strain_calibration_duration = 5*1000;
 
 // twist variables
 int TWIST_PWM_PIN = 12;
@@ -17,7 +23,13 @@ int TWIST_RECEIVER_PIN = 17;
 // PWM
 int twist_duty_cycle = int(0.1*255);
 
-double untwisted_threshold = 950;
+int twist_baseline_untwisted_duration = 10*1000;
+int twist_baseline_twisted_duration = 10*1000;
+int twist_baseline_untwisted_start;
+int twist_baseline_twisted_start;
+int twist_baseline_readings = 0;
+double twist_baseline = 0.0;
+double untwisted_threshold;
 int twist_state = TWIST_START;
 
 const int twist_numReadings = 75;     // number of twist readings to average
@@ -89,6 +101,8 @@ void setup() {
   sum_volts = 0;
   delay_iter = 0;
   oldVOut = 0;
+
+  strain_start = millis();
 }
 
 void loop() {
@@ -117,7 +131,7 @@ void loop() {
 
 
 if (delay_iter > 50) {
-  sendValue(STRAIN, VOut); //send value to Heroku app
+  //sendValue(STRAIN, VOut); //send value to Heroku app
   //Serial.print("strain:"); Serial.println(VOut);
   delay_iter = 0;
 }
@@ -128,7 +142,7 @@ if (delay_iter > 50) {
       inp: TWIST, STRAIN, TOUCH
       value: int, int, float
   */
-    if (millis() - timer > 200) {
+  if (millis() - timer > 200) {
     for (int i = 0; i < len_pins; i++) {
       touchValues[i] = sensors[i].capacitiveSensor(samples_touch);
       button[i] = int(touchValues[i] > mins[i]);
@@ -176,13 +190,45 @@ if (delay_iter > 50) {
 }
 
 void updateTwistFSM() {
- //   Serial.println(twist_state);
    switch(twist_state) {
-    case TWIST_START:
-      twist_state = TWIST_UNTWISTED;
+    case TWIST_START: 
+      if (millis() > strain_start + strain_calibration_duration) {
+        Serial.println("beginning untwisted baseline");
+        twist_state = TWIST_BASELINE_UNTWISTED;
+        twist_baseline_untwisted_start = millis();
+        twist_baseline_readings = 0;
+      }
+      break;
+    case TWIST_BASELINE_UNTWISTED:
+      if (millis() < twist_baseline_untwisted_start + twist_baseline_untwisted_duration) {
+        twist_baseline += twist_average;
+        twist_baseline_readings ++;
+      } else {
+        twist_baseline /= twist_baseline_readings;
+        Serial.print("untwisted baseline:"); Serial.println(twist_baseline);
+        Serial.println("beginning twisted baseline");
+        twist_state = TWIST_BASELINE_TWISTED;
+        twist_baseline_twisted_start = millis();
+        untwisted_threshold = twist_baseline;
+      }
+      break;
+    case TWIST_BASELINE_TWISTED:
+      if (millis() < twist_baseline_twisted_start + twist_baseline_twisted_duration) {
+        untwisted_threshold = min(twist_average, untwisted_threshold);
+      } else {
+        double twist_delta = twist_baseline - untwisted_threshold;
+        untwisted_threshold = twist_baseline - twist_delta * 0.3;
+        Serial.print("untwisted threshold:"); Serial.println(untwisted_threshold);
+        twist_state = TWIST_BASELINE_SETTLE;
+      }
+      break;
+    case TWIST_BASELINE_SETTLE: // let average adjust after baselining
+      if (millis() > twist_baseline_twisted_start + twist_baseline_twisted_duration + 5000) {
+        twist_state = TWIST_UNTWISTED;
+      }
       break;
     case TWIST_UNTWISTED:
-      if (twist_average > untwisted_threshold) {
+      if (twist_average < untwisted_threshold) {
         sendValue(TWIST, 0);
         twist_state = TWIST_TWISTED;
         //Serial.println("twisted");
@@ -201,7 +247,7 @@ void updateTwistFSM() {
             twist_count_above_threshold = 0;
         }
       } else {
-        if (twist_average > untwisted_threshold) {
+        if (twist_average < untwisted_threshold) {
           twist_count_above_threshold ++;
         }
       }
@@ -213,7 +259,7 @@ void updateTwistFSM() {
 
 void updateTwistAverage() {
   // write pwm
-  digitalWrite(TWIST_PWM_PIN, twist_duty_cycle);//pwm();
+  digitalWrite(TWIST_PWM_PIN, twist_duty_cycle);
 
   // subtract the last reading:
   twist_total -= twist_readings[twist_readIndex];
@@ -235,11 +281,19 @@ void updateTwistAverage() {
 
   // calculate the average:
   twist_average = twist_total / twist_numReadings;
-/*
+
+
  // keep scale constant
+ /*
+  Serial.print(twist_baseline);
+  Serial.print(",");
+  Serial.print(untwisted_threshold);
+  Serial.print(",");
   Serial.print(500);
   Serial.print(",");
   // send it to the computer as ASCII digits
   Serial.println(twist_average);
   */
+ 
+ 
 }
