@@ -120,6 +120,8 @@ bool sendValue(SENSOR_INPUTS inp, T val ) {
       }
     case TOUCH:
       if(val != lastTouchInputValue){
+        Serial.print("Touch sensor sending: ");
+        Serial.println(val);
         touchInputCharacteristic.writeValue(val);
         lastTouchInputValue = val;
         return true;

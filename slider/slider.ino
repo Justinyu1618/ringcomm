@@ -4,16 +4,15 @@ uint32_t timer;
 
 int sender = 20;
 int len_pins = 3;
-int touch_pins[6] = {14, 15, 17, 17, 18, 21};
+int touch_pins[6] = {14, 15, 16, 17, 18, 21};
 int prev_buttons[6] = {0, 0, 0, 0, 0, 0};
-int mins[6] = {33, 30, 20, 30, 30, 30}; // should recalibrate on new surface
-int maxes[6] = {90, 60, 30, 73, 73, 76};// should recalibrate on new surface
+int mins[6] = {35, 35, 35, 30, 30, 30}; // should recalibrate on new surface
+int maxes[6] = {90, 60, 80, 73, 73, 76};// should recalibrate on new surface
 double touchValues[6]= {0, 0, 0, 0, 0, 0};
 int button[6] ={0, 0, 0, 0, 0, 0};
 
 int samples_touch = 30;
-int threshold = 50;
-int debug = 1;
+int debug = 0;
 
 CapacitiveSensor sensor0 = CapacitiveSensor(sender, touch_pins[0]);
 CapacitiveSensor sensor1 = CapacitiveSensor(sender, touch_pins[1]);
@@ -34,7 +33,7 @@ void setup() {
    Serial.begin(9600);
    pinMode(sender, OUTPUT);
    for (int i = 0; i < len_pins; i++) {
-     pinMode(touch_pins[i], INPUT); 
+     pinMode(touch_pins[i], INPUT);
    }
 }
 
@@ -72,9 +71,9 @@ void loop() {
         Serial.print("slide,-1;");
       }
     }
-    
+
     prev_state = state;
-    
+
     timer = millis();
   }
 }
