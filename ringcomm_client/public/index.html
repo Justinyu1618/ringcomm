@@ -54,8 +54,17 @@
           </div>
         </div>
         <h3 id="no-device-info">No Device Paired</h3>
+        <div id="calibration">
+          <h3>Calibration Sequence</h3>
+          <div class="h-layout" >
+            <div id="calibration-instructions"></div>
+            <div id="calibration-countdown"></div>
+          </div>
+            
+        </div>
         <h3 id="heartrate-text">
-          Heart Rate: <strong><span id="heartrate-status"></span></strong>
+          Heart Rate:
+          <!-- Heart Rate: <strong><span id="heartrate-status"></span></strong> -->
         </h3>
         <div style="width:75vw;height:300px;" id="graph"></div>
         <div id="data-container-wrapper">
@@ -87,6 +96,8 @@
           <canvas id="user-picture" width="100%" height="100%"></canvas>
           <video id="user-video" autoplay></video>
         </div>
+        <h4 id="camera-text">Picture Taken!</h4>
+        <button class="ui button" id="camera-download">Download Image</button>
         
       </div>
       <div id="Slides" class="page">

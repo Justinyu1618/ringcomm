@@ -6,6 +6,7 @@ var mainChar1;
 var allData = [];
 
 var heartRateNormal = true;
+var calibrating = false;
 
 var slidesLoaded = true;
 var slideN = 1;
@@ -41,7 +42,9 @@ class Characteristic {
       const val = event.target.value.getUint8();
       console.log(this.name + ": " + val);
       allData.unshift(`(${allData.length}) ${name}: ${val}`);
-      onValue(val);
+      if (!calibrating) {
+        onValue(val);
+      }
       render();
     };
   }
@@ -73,13 +76,7 @@ class Characteristic {
 function onTwistSensor(val) {
   console.log("TWIST SENSOR: ", val);
   if (val === 0) {
-    if (slidesLoaded && currentPage === "Slides") {
-      nextSlide();
-    } else if (cameraOn && currentPage === "Camera") {
-      takePicture();
-    } else if (currentPage === "Text") {
-      sendText();
-    }
+    sendText();
   }
 }
 
@@ -88,12 +85,28 @@ function onStrainSensor(val) {
 }
 
 function onTouchSensor(val) {
-  if (val === 1) {
-    sendText();
+  if (val === 0) {
+    previousTab();
+  } else if (val === 2) {
+    nextTab();
+  } else if (val === 1) {
+    if (slidesLoaded && currentPage === "Slides") {
+      nextSlide();
+    } else if (cameraOn && currentPage === "Camera") {
+      takePicture();
+    }
   }
 }
 
 function onPairDeviceClicked() {
+  // for (const inp_param of INPUTS_PARAMS) {
+  //   const newInput = new Characteristic(inp_param);
+  //   newInput.initialize(false);
+  //   inputs.push(newInput);
+  // }
+  // render();
+  // startCalibration();
+  // return;
   console.log("Requesting Ring Comm...");
   navigator.bluetooth
     .requestDevice({
@@ -122,6 +135,7 @@ function onPairDeviceClicked() {
       render();
       $("#pair-device-button").removeClass("loading");
       setConnectionStatus(true);
+      startCalibration();
     })
     .catch((error) => {
       console.log("Argh! " + error);
@@ -129,7 +143,66 @@ function onPairDeviceClicked() {
     });
 }
 
+countdown = 0;
+function startCalibration() {
+  if (calibrating) {
+    return;
+  }
+
+  calibrating = true;
+  $("#calibration").css("display", "block");
+  countdown = 5;
+  $("#calibration-countdown").text(countdown);
+  $("#calibration-countdown").css("display", "block");
+  countdownInterval = setInterval(() => {
+    if (countdown > 0) {
+      countdown -= 1;
+      $("#calibration-countdown").text(countdown);
+    }
+  }, [1000]);
+
+  $("#calibration-instructions").text(
+    "Put on ringcomm, calibrating strain sensor..."
+  );
+  setTimeout(() => {
+    $("#calibration-instructions").text("Leave ring untwisted");
+    countdown = 10;
+    setTimeout(() => {
+      $("#calibration-instructions").text("Twist the ring");
+      countdown = 10;
+      setTimeout(() => {
+        $("#calibration-instructions").text("Calibration Complete!");
+        clearInterval(countdownInterval);
+        $("#calibration-countdown").css("display", "none");
+        $("#calibration").css("background-color", "lightgreen");
+        setTimeout(() => {
+          stopCalibration();
+        }, 3000);
+      }, 10000);
+    }, [10000]);
+  }, [5000]);
+}
+
+function stopCalibration() {
+  countdown = 0;
+  calibrating = false;
+  $("#calibration").css("display", "none");
+  $("#calibration").css("background-color", "lightsteelblue");
+}
+
 // ***** ACTIONS *****
+
+function previousTab() {
+  currentPageN =
+    (pages.length + ((currentPageN - 1) % pages.length)) % pages.length;
+  changePage(pages[currentPageN]);
+}
+
+function nextTab() {
+  currentPageN =
+    (pages.length + ((currentPageN + 1) % pages.length)) % pages.length;
+  changePage(pages[currentPageN]);
+}
 
 function sendText() {
   const msg = $("#text-preset-input").val();
@@ -233,8 +306,13 @@ function setupCamera() {
     $("#user-video").css("display", "initial");
     $("#user-picture").css("display", "none");
     $("#camera-container").css("background-color", "none");
+    $("#camera-text").css("display", "none");
+    $("#camera-download").css("display", "none");
     cameraOn = true;
   });
+
+  const downloadButton = document.getElementById("camera-download");
+  downloadButton.addEventListener("click", downloadPicture);
 
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
     video.srcObject = stream;
@@ -251,6 +329,21 @@ function takePicture() {
     $("#user-video").css("display", "none");
     $("#user-picture").css("display", "block");
     cameraOn = false;
+
+    $("#camera-text").css("display", "block");
+    $("#camera-download").css("display", "block");
+  }
+}
+
+function downloadPicture() {
+  if (!cameraOn) {
+    const image = canvas
+      .toDataURL("image/png", 1.0)
+      .replace("image/png", "image/octet-stream");
+    const link = document.createElement("a");
+    link.download = "ringcomm_pic.png";
+    link.href = image;
+    link.click();
   }
 }
 

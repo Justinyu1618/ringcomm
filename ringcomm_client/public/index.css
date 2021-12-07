@@ -84,6 +84,14 @@
   display: none;
 }
 
+#camera-text {
+  display: none;
+}
+
+#camera-download {
+  display: none;
+}
+
 #Home {
   display: flex;
 }
@@ -106,4 +114,27 @@
 
 #heartrate-text {
   /* display: none; */
+}
+
+#calibration {
+  margin: 30px 0px;
+  background-color: lightsteelblue;
+  display: none;
+  padding: 20px 30px;
+  border-radius: 5px;
+  width: 35vw;
+  text-align: center;
+}
+
+#calibration .h-layout {
+  justify-content: space-around;
+}
+
+#calibration-countdown {
+  font-size: 24px;
+  margin-left: 10px;
+}
+
+#calibration-instructions {
+  font-size: 18px;
 }
