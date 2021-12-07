@@ -15,7 +15,7 @@ BLEService ledService(serviceUUID);
 
 BLEByteCharacteristic twistInputCharacteristic(twistInputUUID, BLERead | BLEWrite | BLENotify);
 BLEFloatCharacteristic strainInputCharacteristic(strainInputUUID, BLERead | BLEWrite | BLENotify);
-BLEFloatCharacteristic touchInputCharacteristic(touchInputUUID, BLERead | BLEWrite | BLENotify);
+BLEByteCharacteristic touchInputCharacteristic(touchInputUUID, BLERead | BLEWrite | BLENotify);
 
 int lastTwistInputValue = 0;
 float lastStrainInputValue = 0;
