@@ -11,8 +11,8 @@ var calibrating = false;
 var slidesLoaded = true;
 var slideN = 1;
 var slideURL =
-  "https://docs.google.com/presentation/d/e/2PACX-1vTzEvwGb-7xGt08LGmmguJcHoKfGyFUmAfN388o4v67clbOU1NqCHD1nYeJzsZGZQybKmECs5a85wid/embed?start=false&loop=false&delayms=6000000&slide=";
-
+  // "https://docs.google.com/presentation/d/e/2PACX-1vTzEvwGb-7xGt08LGmmguJcHoKfGyFUmAfN388o4v67clbOU1NqCHD1nYeJzsZGZQybKmECs5a85wid/embed?start=false&loop=false&delayms=6000000&slide=";
+  "https://docs.google.com/presentation/d/e/2PACX-1vQOGnbZtc3LLzxaMI0vuaU9z5aW0l9QvJU1Bcamx37yIBmntTlzVuAn8xjfren074cok3GiZf0FyKgv/embed?start=false&loop=false&delayms=60000000&slide=";
 var cameraOn = false;
 
 const INPUTS_PARAMS = [
