@@ -75,8 +75,15 @@ class Characteristic {
 
 function onTwistSensor(val) {
   console.log("TWIST SENSOR: ", val);
-  if (val === 0) {
+  // if (val === 0) {
+  //   sendText();
+  // }
+  if (currentPage === "Text") {
     sendText();
+  } else if (slidesLoaded && currentPage === "Slides") {
+    nextSlide();
+  } else if (cameraOn && currentPage === "Camera") {
+    takePicture();
   }
 }
 
@@ -196,14 +203,16 @@ function previousTab() {
   currentPageN =
     (pages.length + ((currentPageN - 1) % pages.length)) % pages.length;
   changePage(pages[currentPageN]);
-  Plotly.deleteTraces("graph", 0);
+  // Plotly.deleteTraces("graph", 0);
+  // Plotly.addTraces("graph", { y: [0] });
 }
 
 function nextTab() {
   currentPageN =
     (pages.length + ((currentPageN + 1) % pages.length)) % pages.length;
   changePage(pages[currentPageN]);
-  Plotly.deleteTraces("graph", 0);
+  // Plotly.deleteTraces("graph", 0);
+  // Plotly.addTraces("graph", { y: [0] });
 }
 
 function sendText() {
@@ -384,8 +393,8 @@ function updateHeartRatePlot(val) {
     y: [[val]],
   };
 
-  const start = time.setSeconds(time.getSeconds() - 30);
-  const end = time.setSeconds(time.getSeconds() + 30);
+  const start = time.setSeconds(time.getSeconds() - 10);
+  const end = time.setSeconds(time.getSeconds() + 10);
 
   const minutesView = {
     xaxis: {
@@ -395,5 +404,5 @@ function updateHeartRatePlot(val) {
   };
 
   Plotly.relayout("graph", minutesView);
-  Plotly.extendTraces("graph", update, [0]);
+  Plotly.extendTraces("graph", update, [0], 200);
 }
