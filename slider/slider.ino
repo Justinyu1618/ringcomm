@@ -12,7 +12,7 @@ double touchValues[6]= {0, 0, 0, 0, 0, 0};
 int button[6] ={0, 0, 0, 0, 0, 0};
 
 int samples_touch = 30;
-int debug = 0;
+int debug = 1;
 
 CapacitiveSensor sensor0 = CapacitiveSensor(sender, touch_pins[0]);
 CapacitiveSensor sensor1 = CapacitiveSensor(sender, touch_pins[1]);

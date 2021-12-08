@@ -54,7 +54,7 @@ int twist_count_above_threshold = 0;
 int sender = 20;
 int len_pins = 3;
 int touch_pins[3] = {14, 15, 16};
-int mins[3] = {35, 35, 35}; // should recalibrate on new surface
+int mins[3] = {35, 35, 20}; // should recalibrate on new surface
 double touchValues[3]= {0, 0, 0};
 int button[3] ={0, 0, 0};
 
