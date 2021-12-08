@@ -196,12 +196,14 @@ function previousTab() {
   currentPageN =
     (pages.length + ((currentPageN - 1) % pages.length)) % pages.length;
   changePage(pages[currentPageN]);
+  Plotly.deleteTraces("graph", 0);
 }
 
 function nextTab() {
   currentPageN =
     (pages.length + ((currentPageN + 1) % pages.length)) % pages.length;
   changePage(pages[currentPageN]);
+  Plotly.deleteTraces("graph", 0);
 }
 
 function sendText() {
