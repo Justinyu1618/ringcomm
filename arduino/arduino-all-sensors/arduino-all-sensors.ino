@@ -130,7 +130,7 @@ void loop() {
   }
 
 
-if (delay_iter > 50) {
+if (delay_iter > 100) {
   sendValue(STRAIN, VOut); //send value to Heroku app
   //Serial.print("strain:"); Serial.println(VOut);
   delay_iter = 0;
