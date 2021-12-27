@@ -54,7 +54,7 @@ int twist_count_above_threshold = 0;
 int sender = 20;
 int len_pins = 3;
 int touch_pins[3] = {14, 15, 16};
-int mins[3] = {35, 35, 20}; // should recalibrate on new surface
+int mins[3] = {35, 35, 35}; // should recalibrate on new surface
 double touchValues[3]= {0, 0, 0};
 int button[3] ={0, 0, 0};
 
@@ -64,7 +64,7 @@ CapacitiveSensor sensor2 = CapacitiveSensor(sender, touch_pins[2]);
 CapacitiveSensor sensors[3] = {sensor0, sensor1, sensor2};
 
 int samples_touch = 30;
-int debug = 0;
+int debug = 1;
 
 int state_NOT_TOUCHED = 0;
 int state_TOUCHED = 1;
@@ -77,8 +77,8 @@ uint32_t timer;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  while(!Serial)
-    continue;
+//  while(!Serial)
+//    continue;
   pinMode(TWIST_PWM_PIN, OUTPUT);
   pinMode(TWIST_RECEIVER_PIN, INPUT);
   pinMode(STRAIN_INP_PIN, OUTPUT);
@@ -131,7 +131,7 @@ void loop() {
 
 
 if (delay_iter > 50) {
-  //sendValue(STRAIN, VOut); //send value to Heroku app
+  sendValue(STRAIN, VOut); //send value to Heroku app
   //Serial.print("strain:"); Serial.println(VOut);
   delay_iter = 0;
 }

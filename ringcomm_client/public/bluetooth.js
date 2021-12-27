@@ -33,46 +33,6 @@ const INPUTS_PARAMS = [
   },
 ];
 
-const inputs = [];
-class Characteristic {
-  constructor({ uuid, name, onValue }) {
-    this.uuid = uuid;
-    this.name = name;
-    this.handleNotification = (event) => {
-      const val = event.target.value.getUint8();
-      console.log(this.name + ": " + val);
-      allData.unshift(`(${allData.length}) ${name}: ${val}`);
-      if (!calibrating) {
-        onValue(val);
-      }
-      render();
-    };
-  }
-
-  initialize(BLEService) {
-    if (!BLEService) {
-      window.addEventListener("keypress", (event) => {
-        console.log(event.key, this.name[2]);
-        if (event.key === this.name[2]) {
-          this.handleNotification({ target: { value: 1 } });
-        }
-      });
-      return;
-    }
-
-    BLEService.getCharacteristic(this.uuid).then((characteristic) => {
-      this.characteristic = characteristic;
-      this.characteristic.startNotifications().then((_) => {
-        console.log("> Started notifications for " + this.name);
-        this.characteristic.addEventListener(
-          "characteristicvaluechanged",
-          this.handleNotification
-        );
-      });
-    });
-  }
-}
-
 function onTwistSensor(val) {
   console.log("TWIST SENSOR: ", val);
   // if (val === 0) {
@@ -105,15 +65,38 @@ function onTouchSensor(val) {
   }
 }
 
+const inputs = [];
+class Characteristic {
+  constructor({ uuid, name, onValue }) {
+    this.uuid = uuid;
+    this.name = name;
+    this.handleNotification = (event) => {
+      const val = event.target.value.getUint8();
+      console.log(this.name + ": " + val);
+      allData.unshift(`(${allData.length}) ${name}: ${val}`);
+      if (!calibrating) {
+        onValue(val);
+      }
+      render();
+    };
+  }
+
+  initialize(BLEService) {
+    BLEService.getCharacteristic(this.uuid).then((characteristic) => {
+      this.characteristic = characteristic;
+      this.characteristic.startNotifications().then((_) => {
+        console.log("> Started notifications for " + this.name);
+        this.characteristic.addEventListener(
+          "characteristicvaluechanged",
+          this.handleNotification
+        );
+      });
+    });
+  }
+}
+
+// pairing sequence for bluetooth device
 function onPairDeviceClicked() {
-  // for (const inp_param of INPUTS_PARAMS) {
-  //   const newInput = new Characteristic(inp_param);
-  //   newInput.initialize(false);
-  //   inputs.push(newInput);
-  // }
-  // render();
-  // startCalibration();
-  // return;
   console.log("Requesting Ring Comm...");
   navigator.bluetooth
     .requestDevice({
